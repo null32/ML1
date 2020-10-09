@@ -3,6 +3,7 @@
 import math # math.pi, ...
 import matplotlib.pyplot as plt # visualization
 import random # random
+import statistics
 
 def metricDef(x1, x2):
 	return abs(x1 - x2)
@@ -51,6 +52,8 @@ def lowess(X, Y, kernelFunc, metric, h, smoothKernelFunc):
 			nom = 0
 			denom = 0
 			for j in range(l):
+				if i == j:
+					continue
 				k = kernelFunc(metric(X[i], X[j]) / h)
 				nom += Y[j] * k * smoothing[j]
 				denom += k * smoothing[j]
@@ -58,15 +61,7 @@ def lowess(X, Y, kernelFunc, metric, h, smoothKernelFunc):
 
 		newSmoothing = []
 		for i in range(l):
-			nom = 0
-			denom = 0
-			for j in range(l):
-				if i == j:
-					continue
-				k = kernelFunc(metric(X[i], X[j]) / h)
-				nom += Y[j] * k * smoothing[j]
-				denom += k * smoothing[j]
-			err = abs((nom / denom) - Y[i])
+			err = abs(res[i] - Y[i])
 			newSmoothing.append(smoothKernelFunc(err))
 		smoothing = newSmoothing
 	return res
