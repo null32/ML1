@@ -6,6 +6,7 @@ import os
 import numpy as np
 from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
 
 def main():
     # data_path = os.path.join(os.path.dirname(__file__), './LR_wine_data/winequality-red.csv')
@@ -19,6 +20,7 @@ def main():
 
     X = np.array(list(map(lambda c: c[:-1], wine_data)))
     Y = np.array(list(map(lambda c: c[-1], wine_data)))
+    n = len(Y)
     # print('header: ', header)
     # LR(X, Y)
     coefs_big = solve_system(X, Y)
@@ -28,8 +30,8 @@ def main():
     print("Regression function with 2 variables:\n\t", pretty_function(coefs_small))
     err_big = quality(X, Y, coefs_big)
     err_small = quality(smallerX, Y, coefs_small)
-    print(f"Average error for\n\t11 vars: {err_big}\n\tfor 2 vars: {err_small}")
-    visualize(smallerX)
+    print(f"Average error for\n\t11 vars: Q = {err_big}, Q/n = {err_big / n}\n\tfor 2 vars: Q = {err_small}, Q/n = {err_small / n}")
+    visualize(smallerX, Y)
 
 def quality(X, Y, a):
     assert X.shape[0] == len(Y)
@@ -38,9 +40,9 @@ def quality(X, Y, a):
 
     err = 0.0
     for i in range(n):
-        err += abs(np.dot(X[i], a) - Y[i])
+        err += pow(np.dot(X[i], a) - Y[i], 2)
     
-    return err / n
+    return err
 
 def PCA(X, n=2):
     V, D, U = np.linalg.svd(X, full_matrices=False)
@@ -49,10 +51,15 @@ def PCA(X, n=2):
 
     return res
 
-def visualize(X):
+def visualize(X, Y):
     plt.figure(figsize=(15, 10))
-    plt.plot(X[:, 0], X[:, 1], '.', color = '#0000FF', label = 'Xs')
-    plt.legend(loc = 'upper right')
+    #colors = np.array(['red', 'yellow', 'green'])
+    colors = ListedColormap(['red', 'yellow', 'green'])
+    classes = np.int32(Y / 3.333)
+    # y = colors[classes]
+    sc = plt.scatter(X[:, 0], X[:, 1], c = classes, cmap = colors)
+    
+    plt.legend(handles=sc.legend_elements()[0], loc = 'upper right', title = "Wine quality", labels = ['0 - 3.33', '3.33 - 6.66', '6.66 - 10'])
     plt.show()
 
 def normalize(X):
